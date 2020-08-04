@@ -1,30 +1,34 @@
-<script>
-	export let name;
+<script lang="ts">
+  import { Router, Link, Route } from "svelte-routing";
+  import Tailwindcss from "./Tailwindcss.svelte";
+  import Header from "./components/Header.svelte";
+  import Footer from "./components/Footer.svelte";
+  import Index from "./pages/Index.svelte";
+  import Poll from "./pages/Poll.svelte";
 </script>
 
-<main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
-</main>
+<style type="scss">
+  :global(html, body) {
+    padding: 0;
+  }
 
-<style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
+  :global(body) {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+  }
 </style>
+
+<Tailwindcss />
+<Router>
+  <Header />
+  <main class="px-3 py-3 sm:px-6 flex-1">
+    <Route path="/poll">
+      <Poll />
+    </Route>
+    <Route path="/">
+      <Index />
+    </Route>
+  </main>
+  <Footer />
+</Router>
