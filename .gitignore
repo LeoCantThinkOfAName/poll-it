@@ -2,5 +2,6 @@
 /public/build/
 yarn-error.log
 yarn.lock
+.env
 
 .DS_Store

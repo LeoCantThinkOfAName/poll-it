@@ -17,18 +17,18 @@
     height: 100%;
     flex-direction: column;
   }
+
+  :global(.grecaptcha-badge) {
+    visibility: hidden;
+  }
 </style>
 
 <Tailwindcss />
 <Router>
   <Header />
-  <main class="px-3 py-3 sm:px-6 flex-1">
-    <Route path="/poll">
-      <Poll />
-    </Route>
-    <Route path="/">
-      <Index />
-    </Route>
+  <main class="px-3 py-3 sm:px-6 flex-1 text-gray-700">
+    <Route path="/poll/:pollId" component={Poll} />
+    <Route path="/" component={Index} />
   </main>
   <Footer />
 </Router>
