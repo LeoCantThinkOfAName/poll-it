@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { fade, fly } from "svelte/transition";
   import { database } from "../firebase.ts";
   import { pollTitle, pollOptions } from "../Store.ts";
   import { navigate } from "svelte-routing";
@@ -17,20 +18,27 @@
 
   const handleSubmit = (e: Event) => {
     e.preventDefault();
+    // filter out empty option
+    const options = Object.values($pollOptions).filter(
+      option => option.title !== ""
+    );
+
     // check if title is more than 3 chars
     if ($pollTitle.length <= 3) return;
     // check if options are more than two
-    if (pollOptions[0] === "" || pollOptions[2] === "") return;
+    if (options.length < 2) return;
 
-    // filter out empty option
-    const options = $pollOptions.filter(option => option.title !== "");
+    const optionsObj = {};
+    options.forEach((option, index) => {
+      optionsObj[index] = option;
+    });
 
     // create new poll record
     database
       .collection("polls")
       .add({
         title: $pollTitle,
-        options,
+        options: optionsObj,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       })
       .then(docRef => {
@@ -45,17 +53,17 @@
 
   const handleOptionInput = (e: Event, index: number) => {
     const value = e.target.value;
-    const length = $pollOptions.length;
+    const length = Object.keys($pollOptions).length;
     // if last options is filled, create a new input,
-    if (index + 1 === length && length < 6 && value !== "") {
-      pollOptions.set([
+    if (index + 1 === length && value !== "" && length < 6) {
+      pollOptions.set({
         ...$pollOptions,
-        { id: index + 1, title: "", votes: 0 }
-      ]);
-    } else if (index < length) {
-      return;
-    } else {
-      pollOptions.set();
+        [index + 1]: { title: "", votes: 0 }
+      });
+    } else if (index + 2 === length && value === "" && length > 2) {
+      const newObj = { ...$pollOptions };
+      delete newObj[index + 1];
+      pollOptions.set({ ...newObj });
     }
   };
 </script>
@@ -80,9 +88,9 @@
     <p class="text-xs mb-1 self-start font-bold">
       Options (You can have up to 6 options, and no least than 2 options)
     </p>
-    <fieldset class="border-gray-400 border p-2 w-full mb-3">
-      {#each $pollOptions as option, index}
-        <div class="w-full my-2">
+    <fieldset class="border-gray-400 border p-2 w-full mb-3 transition-all">
+      {#each Object.keys($pollOptions) as optionKey, index}
+        <div in:fly={{ y: 25, duration: 500 }} out:fade class="w-full my-2">
           <label
             for={`option-${index}`}
             class="text-xs mb-1 text-gray-500 font-bold">
@@ -93,7 +101,7 @@
             class="w-full p-2 outline-none border-gray-400 rounded-none"
             type="text"
             placeholder="Filled in your option"
-            bind:value={option.title}
+            bind:value={$pollOptions[optionKey].title}
             on:input={e => handleOptionInput(e, index)} />
         </div>
       {/each}

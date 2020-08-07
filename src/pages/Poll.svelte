@@ -4,7 +4,10 @@
   import { database } from "../firebase.ts";
   export let pollId;
   // create local poll store
-  const poll = writable();
+  const title = writable("");
+  const options = writable(undefined);
+  const originalPolls = writable(undefined);
+  const total = writable(0);
 
   // this will kepp listening firebase database(?)
   database
@@ -12,7 +15,16 @@
     .doc(pollId)
     .onSnapshot(doc => {
       const data = doc.data();
-      poll.set(data);
+      const optionsArr = Object.values(data.options).map((option, index) => {
+        return {
+          id: index,
+          ...option
+        };
+      });
+      title.set(data.title);
+      options.set(optionsArr);
+      total.set(calcTotalVotes());
+      originalPolls.set(data.options);
     });
 
   const handleInput = (e: Event) => {
@@ -21,30 +33,30 @@
     calculatePercentage();
   };
 
-  const calcPercentage = (votes: number) => {
-    const total = $poll.options.reduce((acc, val) => {
+  const calcTotalVotes = () => {
+    const total = $options.reduce((acc, val) => {
       if (typeof acc === "number") {
         return acc + val.votes;
       } else {
         return acc.votes + val.votes;
       }
     });
-    return (votes / total) * 100;
+    return total;
+  };
+
+  const calcPercentage = (votes: number) => {
+    return (votes / $total) * 100;
   };
 
   const vote = (optionId: number) => {
     // update record
     const increment = firebase.firestore.FieldValue.increment(1);
-    const newOptions = [...$poll.options];
+    const target = `options.${optionId}.votes`;
     database
       .collection("polls")
       .doc(pollId)
       .update({
-        options: newOptions[optionId] = {
-          id: optionId,
-          title: $poll.options[optionId].title,
-          votes: increment
-        }
+        [target]: increment
       });
   };
 
@@ -74,17 +86,16 @@
 </style>
 
 <div class="flex flex-1 h-full justify-center items-center flex-col">
-  <h2 class="text-xl font-bold mb-3">
-    {#if $poll !== undefined}{$poll.title}{/if}
-  </h2>
+  <h2 class="text-2xl font-bold">{$title}</h2>
+  <p class="mb-3 text-sm text-gray-500">Total participants: {$total}</p>
   <form
     id="vote"
     on:submit={handleSubmit}
     class="max-w-full w-full sm:max-w-lg flex justify-center items-center
     flex-col">
     <div class="w-full border border-gray-400 px-3 py-1 mb-1">
-      {#if $poll !== undefined}
-        {#each $poll.options.sort((a, b) => b.votes - a.votes) as option, index (option.id)}
+      {#if $options !== undefined}
+        {#each $options.sort((a, b) => b.votes - a.votes) as option, index (option.id)}
           <div
             out:send={{ key: option.id }}
             animate:flip
