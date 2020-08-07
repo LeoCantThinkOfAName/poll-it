@@ -10,7 +10,7 @@ Please don't spam :P
 
 ## Technologies
 
-- [svelte](https://svelte.dev/ "svelte") (because it seens fun :D)
+- [svelte](https://svelte.dev/ "svelte") (because it seems fun :D)
 - [tailwind](https://tailwindcss.com/, "tailwind") (utility styling is a cool idea)
 - [firebase](https://firebase.google.com "firebase") (i'm just too lazy to build a backend for this)
 - [typescript](https://www.typescriptlang.org/, "typescript") (ts is really crappy with svelte :/)
