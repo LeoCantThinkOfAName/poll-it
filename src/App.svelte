@@ -5,6 +5,8 @@
   import Footer from "./components/Footer.svelte";
   import Index from "./pages/Index.svelte";
   import Poll from "./pages/Poll.svelte";
+
+  export let url = "";
 </script>
 
 <style type="scss">
@@ -24,7 +26,7 @@
 </style>
 
 <Tailwindcss />
-<Router>
+<Router {url}>
   <Header />
   <main class="px-3 py-3 sm:px-6 flex-1 text-gray-700">
     <Route path="/poll/:pollId" component={Poll} />

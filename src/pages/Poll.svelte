@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { onMount, onDestroy } from "svelte";
   import { writable } from "svelte/store";
   import { flip } from "svelte/animate";
+  import { crossfade } from "svelte/transition";
   import { database } from "../firebase.ts";
   export let pollId;
   // create local poll store
@@ -9,8 +11,12 @@
   const originalPolls = writable(undefined);
   const total = writable(0);
 
+  const [send, receive] = crossfade({
+    duration: d => Math.sqrt(d * 200)
+  });
+
   // this will kepp listening firebase database(?)
-  database
+  const unsubscribe = database
     .collection("polls")
     .doc(pollId)
     .onSnapshot(doc => {
@@ -25,7 +31,18 @@
       options.set(optionsArr);
       total.set(calcTotalVotes());
       originalPolls.set(data.options);
+      console.log("votes updated!");
     });
+
+  onMount(() => {
+    console.log("Start listenging on snapshots events...");
+  });
+
+  onDestroy(() => {
+    // kill onSnapshot listener
+    unsubscribe();
+    console.log("unmount, stop listening on snapshot events...");
+  });
 
   const handleInput = (e: Event) => {
     const newNum = parseInt(e.target.value);
@@ -97,6 +114,7 @@
       {#if $options !== undefined}
         {#each $options.sort((a, b) => b.votes - a.votes) as option, index (option.id)}
           <div
+            in:receive={{ key: option.id }}
             out:send={{ key: option.id }}
             animate:flip
             class="bg-gray-200 my-2 flex items-center relative overflow-hidden">

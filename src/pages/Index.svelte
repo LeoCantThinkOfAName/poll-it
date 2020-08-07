@@ -72,6 +72,11 @@
   <form
     class="flex flex-col items-center justify-center w-full"
     on:submit={handleSubmit}>
+    <h2 class="text-xl font-bold text-center mb-3">
+      Create A
+      <span class="text-teal-500">Realtime</span>
+      Poll With Ease!
+    </h2>
     <div class="w-full my-2">
       <label for="pollTitle" class="text-xs mb-1 font-bold">
         Topic (Required, must longer than 3 characters)
