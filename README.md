@@ -2,7 +2,7 @@
 
 Just a simple straw poll like app...
 
-<div style="text-align: center">
+<div align="center">
   <img src="./20200807_163511.gif" alt="demo image"/>
 </div>
 
